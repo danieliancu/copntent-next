@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background:#f0f0f0;
   --foreground: #171717;
 }
 
@@ -49,7 +49,8 @@ body {
 
 .container-news strong
 {
-  padding: 0 0 0 20px;
+  padding: 10px 0 0 20px;
+  display: block;
 }
 
 .container h3 {
@@ -66,7 +67,32 @@ body {
   border-radius: 10px 10px 0 0;
 }
 
+.logo {
+  font-size:26px;
+}
 
+.logo a {
+  font-weight:bold;
+}
+
+.logo select {
+  font-size:20px;
+  padding:10px;
+}
+
+.logo select {
+  outline: none;
+}
+
+
+
+
+
+.giphy {
+  width:15px;
+  float:left;
+  margin:3px !important;
+}
 
 .menu button {
   margin-right:5px !important;
@@ -78,6 +104,8 @@ body {
   vertical-align: middle;
   opacity: .6;
   transition: opacity 0.25s;
+  padding:0 15px ;
+  border:.5px solid red;
 }
 
 .menu button:hover,
@@ -124,7 +152,7 @@ h1 {
   position: sticky;
   top: 0;
   background: white;
-  box-shadow: 0 3px 3px grey;
+  box-shadow: 0 3px 3px lightgrey;
   padding: 20px;
   z-index:2;
   display: flex;
@@ -241,7 +269,7 @@ button {
   .container-news {
     padding:10px;
     overflow:hidden;
-    max-height: 170px; 
+    max-height: 168px; 
   }
   .slick-dots {
     display: none !important;

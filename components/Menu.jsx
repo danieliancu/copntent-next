@@ -4,19 +4,31 @@ const Menu = ({ selectedSource, handleFilter }) => {
   return (
     <div className="menu">
       <div>
-        <h1>
+        <h1 className="logo">
           <a href="/" style={{ letterSpacing: "-1px", color: "black" }}>
-            contents
+            contents.ro | 
           </a>
+          <select>
+            <option>Actualitate</option>
+            <option>Economie</option>
+            <option>Sport</option>    
+            <option>Sănătate</option>                              
+            <option>Monden</option>                  
+          </select>
         </h1>
       </div>
       <div>
         <button
-          style={{ background: "red", color: "white", padding: "0 5px" }}
+          style={{ border:"1px solid red", color:"red", padding: "0 10px" }}
           onClick={() => handleFilter("all")}
           className={selectedSource === "all" ? "active" : ""}
         >
-          Toate știrile
+        <img
+          src="/images/giphy_transparent.gif"
+          alt="Loading"
+          className="giphy"
+        />          
+          Ultima oră
         </button>
         {["g4media", "hotnews", "ziare", "digi24", "spotmedia", "libertatea", "stirileprotv", "news", "gsp", "prosport"].map((source) => (
           <button
