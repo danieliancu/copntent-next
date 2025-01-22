@@ -81,7 +81,6 @@ body {
   box-shadow: 0 0 2px lightgrey;
   border-radius:10px;
   width:300px;
-  transition: box-shadow 0.3s ease; /* Adaugă un delay de 0.3 secunde */
 }
 
 .container-news:hover {
@@ -100,6 +99,12 @@ body {
   font-size: 16px;
   font-weight: 400;
 }
+
+.ago {
+  padding: 0 0 20px 20px;
+  font-size: 12px;
+  font-weight: 800;
+}  
 
 .container img {
   width:100%;
@@ -277,8 +282,10 @@ button {
 
 .slick-art {
   background-size: cover !important;
-  height: 400px;
+  height: 300px;
   position: relative;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .slick-art>div {
@@ -298,7 +305,7 @@ button {
 .slick-art h3 {
   font-size:18px;
   line-height:28px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .slick-prev, .slick-next {
@@ -315,8 +322,25 @@ button {
 
 @media only screen and (max-width: 600px) {
   .slick-list {
-    max-width:300px;
+    max-width:100% !important;
   }
+
+  .slick-slider {
+    min-width:100% !important;
+  }
+  
+  .slick-dots {
+    display: none !important;
+  }
+
+  .slick-art {
+    border-radius:0px !important;
+  }
+
+  .container-all-carousel {
+    width:100%;
+  }
+
   .container img {
     width:30%;
     height:100%;
@@ -331,9 +355,10 @@ button {
     width:100%;
     border-radius:0;
   }
-  .slick-dots {
-    display: none !important;
+  .ago {
+    display: none;
   }
+
   .container-news strong {
     padding:0;
   }

@@ -108,7 +108,7 @@ const App = () => {
                 {item.href && (
                   <a href={item.href} target="_blank" rel="noopener noreferrer">
                     <h3>{item.text}</h3>
-                    <p style={{ padding: "0 0 20px 20px", fontSize: "12px", fontWeight: "800" }}>
+                    <p className="ago">
                       {(() => {
                         const now = new Date();
                         const date = new Date(item.date);

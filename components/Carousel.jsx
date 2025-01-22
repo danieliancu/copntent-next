@@ -16,7 +16,7 @@ const Carousel = ({ items }) => {
   };
 
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div className="container-all-carousel" style={{ marginBottom: "20px" }}>
       <div className="ultima-ora">
       <img
           src="/images/giphy_transparent.gif"
@@ -30,12 +30,6 @@ const Carousel = ({ items }) => {
           <div key={index}>
             <div
               className="slick-art"
-              style={{
-                position: "relative",
-                height: "300px",
-                borderRadius: "10px",
-                overflow: "hidden",
-              }}
             >
               <img
                 src={item.imgSrc}
