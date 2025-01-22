@@ -16,15 +16,18 @@ const sitesConfig = {
     g4media: {
       url: "https://g4media.ro",
       tags: [{ tag: "div.post-review", contentSelector: "h3" }],
+      cat: "Actualitate",
     },
     hotnews: {
       url: "https://hotnews.ro",
       tags: [{ tag: "article", contentSelector: "h2" }],
+      cat: "Actualitate",
     },
     spotmedia: {
       url: "https://spotmedia.ro",
       tags: [{ tag: "div.jet-smart-listing__post", contentSelector: "div.mbm-h5" }],
       tags: [{ tag: "div.jet-smart-listing__post", contentSelector: "div.mbm-h6" }],
+      cat: "Actualitate",
     },
     ziare: {
       url: "https://ziare.com",
@@ -33,6 +36,7 @@ const sitesConfig = {
         { tag: "div.spotlight__article", contentSelector: "h2.spotlight__article__title" },
         { tag: "div.news__article", contentSelector: "h3.news__article__title" },
       ],
+      cat: "Actualitate",
     },
     digi24: {
       url: "https://digi24.ro",
@@ -40,6 +44,7 @@ const sitesConfig = {
         { tag: "article.article-alt", contentSelector: "h3.article-title" },
         { tag: "article", contentSelector: "h4.article-title" },      
       ],
+      cat: "Actualitate",
     },
     libertatea: {
       url: "https://libertatea.ro",
@@ -47,22 +52,27 @@ const sitesConfig = {
         { tag: "div.news-item", contentSelector: "h3.article-title" },
         { tag: "div.news-item", contentSelector: "h2.article-title" },
       ],
+      cat: "Actualitate",
     },
     stirileprotv: {
       url: "https://stirileprotv.ro",
       tags: [{ tag: "article.article", contentSelector: "h3.article-title-daily" }],
+      cat: "Actualitate",
     }, 
     news: {
       url: "https://news.ro",
       tags: [{ tag: "article.article", contentSelector: "h2" }],
+      cat: "Actualitate",
     },   
     gsp: {
       url: "https://gsp.ro",
       tags: [{ tag: "div.news-item", contentSelector: "h2" }],
+      cat: "Sport",
     },          
     prosport: {
       url: "https://prosport.ro",
       tags: [{ tag: "div.article--wide", contentSelector: "h2.article__title" }],
+      cat: "Sport",
     },            
   };
 

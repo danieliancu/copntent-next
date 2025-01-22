@@ -6,7 +6,7 @@ const Menu = ({ selectedSource, handleFilter }) => {
       <div>
         <h1 className="logo">
           <a href="/" style={{ letterSpacing: "-1px", color: "black" }}>
-            contents.ro | 
+            <span style={{ paddingRight:"10px" }}>newsflow</span> | 
           </a>
           <select>
             <option>Actualitate</option>
