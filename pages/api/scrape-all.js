@@ -88,7 +88,15 @@ const sitesConfig = {
     url: "https://csid.ro",
     tags: [{ tag: "div.article", contentSelector: "h3.article__title" }],
     cat: "Sănătate",
-  },                
+  },
+  viva: {
+    url: "https://viva.ro",
+    tags: [
+      { tag: "article.art-small", contentSelector: "h3.art-title" },
+      { tag: "article.art", contentSelector: "h3.art-title" },      
+    ],
+    cat: "Monden",
+  },                  
 };
 
 const gotoWithRetry = async (page, url, retries = 3) => {
@@ -103,6 +111,8 @@ const gotoWithRetry = async (page, url, retries = 3) => {
   }
 };
 
+
+
 const scrapeTags = async (page, tags, source) => {
   const results = [];
   const seenLinks = new Set();
@@ -110,14 +120,14 @@ const scrapeTags = async (page, tags, source) => {
   for (const { tag, contentSelector } of tags) {
     const elements = await page.$$eval(
       tag,
-      (elements, contentSelector) =>
+      (elements, contentSelector, source) =>
         elements.map((el) => {
           // Verifică categoria
           const categoryElement = el.querySelector(".article__category");
           const category = categoryElement ? categoryElement.textContent.trim() : null;
 
-          // Ignoră articolul dacă categoria nu este "Sport"
-          if (category !== "Sport") {
+          // Aplică filtrul pentru categoria "Sport" doar pentru sursa "fanatik"
+          if (source === "fanatik" && category !== "Sport") {
             return null;
           }
 
@@ -156,7 +166,8 @@ const scrapeTags = async (page, tags, source) => {
             category: category, // Adaugă categoria la rezultatele finale
           };
         }),
-      contentSelector
+      contentSelector,
+      source // Trece sursa ca parametru
     );
 
     elements
