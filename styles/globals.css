@@ -115,6 +115,7 @@ body {
 
 .menu button.active {
   opacity: 1; /* Butonul selectat va avea opacitate maximă */
+  font-weight:bold;
 }
 
 .menu .button-large {
