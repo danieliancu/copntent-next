@@ -47,6 +47,7 @@ const App = () => {
   };
 
   const filterData = (source, category, data = allData) => {
+
     let filtered = data;
 
     if (source !== "all") {

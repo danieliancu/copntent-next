@@ -63,7 +63,12 @@ const sitesConfig = {
     url: "https://news.ro",
     tags: [{ tag: "article.article", contentSelector: "h2" }],
     cat: "Actualitate",
-  },   
+  }, 
+  evz: {
+    url: "https://evz.ro",
+    tags: [{ tag: "div.banner-post-two", contentSelector: "h2.post-title" }],
+    cat: "Actualitate",
+  },
   gsp: {
     url: "https://gsp.ro",
     tags: [{ tag: "div.news-item", contentSelector: "h2" }],
