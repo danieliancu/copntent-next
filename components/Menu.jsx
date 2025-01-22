@@ -8,7 +8,7 @@ const Menu = ({ selectedSource, selectedCategory, handleFilter, handleCategoryFi
           <a href="/" style={{ letterSpacing: "-1px", color: "black" }}>
             <span style={{ paddingRight: "10px" }}>newsflow.ro</span> |
           </a>
-          <select onChange={(e) => handleCategoryFilter(e.target.value)} value={selectedCategory}>
+          <select onChange={(e) => handleCategoryFilter(e.target.value)} value={selectedCategory} style={{ background:"white" }}>
             <option value="Actualitate">Actualitate</option>
             <option value="Economie">Economie</option>
             <option value="Sport">Sport</option>
@@ -19,7 +19,7 @@ const Menu = ({ selectedSource, selectedCategory, handleFilter, handleCategoryFi
       </div>
       <div>
         <button
-          style={{ border: "1px solid red", color: "red", padding: "0 10px" }}
+          style={{ color: "red", padding: "0 10px" }}
           onClick={() => handleFilter("all")}
           className={selectedSource === "all" ? "active" : ""}
         >

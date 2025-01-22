@@ -147,7 +147,6 @@ body {
   opacity: .6;
   transition: opacity 0.25s;
   padding:0 15px ;
-  border:.5px solid red;
   font-size: 12px;
 }
 

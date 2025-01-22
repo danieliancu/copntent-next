@@ -10,7 +10,7 @@ const App = () => {
   const [selectedCategory, setSelectedCategory] = useState("Actualitate"); // Implicit "Actualitate"
   const [loading, setLoading] = useState(true);
 
-  const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
+  // const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -20,9 +20,9 @@ const App = () => {
         const result = await response.json();
 
         if (response.ok) {
-          const shuffledData = shuffleArray(result.data);
-          setAllData(shuffledData);
-          filterData("all", "Actualitate", shuffledData); // Filtrare implicită la încărcare
+          // const shuffledData = shuffleArray(result.data);
+          setAllData(result.data);
+          filterData("all", "Actualitate", result.data); // Filtrare implicită la încărcare
         } else {
           setError(result.error || "Failed to fetch data");
         }
