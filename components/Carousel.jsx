@@ -17,6 +17,14 @@ const Carousel = ({ items }) => {
 
   return (
     <div style={{ marginBottom: "20px" }}>
+      <div className="ultima-ora">
+      <img
+          src="/images/giphy_transparent.gif"
+          alt="Loading"
+          className="giphy"
+        />          
+        Ultima oră
+        </div>
       <Slider {...carouselSettings}>
         {items.map((item, index) => (
           <div key={index}>

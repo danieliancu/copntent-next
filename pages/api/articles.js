@@ -10,9 +10,24 @@ const pool = mysql.createPool({
   database: process.env.MYSQL_ADDON_DB,
   port: process.env.MYSQL_ADDON_PORT,
   waitForConnections: true,
-  connectionLimit: 5,
-  queueLimit: 0,
+  connectionLimit: 10, // Crește limita conexiunilor simultane
+  queueLimit: 0,       // Fără limită pentru coada de cereri
+  acquireTimeout: 30000, // Timeout pentru obținerea conexiunii (60 secunde)
 });
+
+
+export const queryWithRetry = async (query, params = [], retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const [rows] = await pool.query(query, params);
+      return rows;
+    } catch (error) {
+      if (i === retries - 1) throw error; // Re-aruncă eroarea la ultima încercare
+      console.warn(`Retrying query, attempt ${i + 1}`);
+    }
+  }
+};
+
 
 console.log("MYSQL_ADDON_HOST:", process.env.MYSQL_ADDON_HOST);
 console.log("MYSQL_ADDON_PORT:", process.env.MYSQL_ADDON_PORT);
@@ -33,6 +48,7 @@ const initializeDB = async () => {
           text TEXT,
           href TEXT,
           imgSrc TEXT,
+          cat VARCHAR(50),
           date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);

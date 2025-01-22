@@ -17,7 +17,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 
@@ -25,6 +25,47 @@ body {
   box-sizing: border-box;
   margin:0px !important;
 }
+
+
+
+
+/*  spinner  */
+
+.loading {
+  position: fixed;
+  top: 85px;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.spinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 10px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: #007bff;
+  animation: spin 1s ease-in-out infinite;
+  margin-top: -30px !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
+
+
+
 
 .container {
   display: flex;
@@ -44,7 +85,7 @@ body {
 }
 
 .container-news:hover {
-  box-shadow: 0 0 10px black;
+  box-shadow: 0 0 10px grey;
 }
 
 .container-news strong
@@ -88,11 +129,7 @@ body {
 
 
 
-.giphy {
-  width:15px;
-  float:left;
-  margin:3px !important;
-}
+
 
 .menu button {
   margin-right:5px !important;
@@ -106,6 +143,7 @@ body {
   transition: opacity 0.25s;
   padding:0 15px ;
   border:.5px solid red;
+  font-size: 12px;
 }
 
 .menu button:hover,
@@ -201,7 +239,26 @@ button {
 
 
 
+.ultima-ora {
+  position: absolute;
+  z-index:1;
+  margin-top:20px !important;
+  margin-left:20px !important;
+  background: white;
+  border-radius:5px;
+  color: red;
+  padding:5px 10px;
+  text-transform: uppercase;
+  font-size:12px;
+  font-weight:bold;
+}
 
+.giphy {
+  width:11px !important;
+  height: 11px !important;
+  float:left !important;
+  margin:3px !important;
+}
 
 
 .slick-list {
@@ -239,9 +296,9 @@ button {
 }
 
 .slick-art h3 {
-  font-size:24px;
-  line-height:30px;
-  font-weight: 500;
+  font-size:18px;
+  line-height:28px;
+  font-weight: 800;
 }
 
 .slick-prev, .slick-next {
@@ -271,6 +328,8 @@ button {
     padding:10px;
     overflow:hidden;
     max-height: 168px; 
+    width:100%;
+    border-radius:0;
   }
   .slick-dots {
     display: none !important;
