@@ -78,7 +78,17 @@ const sitesConfig = {
     url: "https://prosport.ro",
     tags: [{ tag: "div.article--wide", contentSelector: "h2.article__title" }],
     cat: "Sport",
-  },            
+  },   
+  fanatik: {
+    url: "https://fanatik.ro",
+    tags: [{ tag: "div.article", contentSelector: "h3.article__title" }],
+    cat: "Sport",
+  },   
+  csid: {
+    url: "https://csid.ro",
+    tags: [{ tag: "div.article", contentSelector: "h3.article__title" }],
+    cat: "Sănătate",
+  },                
 };
 
 const gotoWithRetry = async (page, url, retries = 3) => {
@@ -102,9 +112,40 @@ const scrapeTags = async (page, tags, source) => {
       tag,
       (elements, contentSelector) =>
         elements.map((el) => {
-          const imgElement = el.querySelector("img");
-          const imgSrc = imgElement?.getAttribute("data-src") || imgElement?.src || null;
+          // Verifică categoria
+          const categoryElement = el.querySelector(".article__category");
+          const category = categoryElement ? categoryElement.textContent.trim() : null;
 
+          // Ignoră articolul dacă categoria nu este "Sport"
+          if (category !== "Sport") {
+            return null;
+          }
+
+          // Extrage imaginea
+          let imgSrc = null;
+          const pictureElement = el.querySelector("picture");
+          if (pictureElement) {
+            const sourceElement = pictureElement.querySelector("source");
+            if (sourceElement) {
+              imgSrc = sourceElement.getAttribute("srcset");
+            }
+
+            const imgElement = pictureElement.querySelector("img");
+            if (!imgSrc && imgElement) {
+              imgSrc = imgElement.getAttribute("src");
+            }
+          }
+
+          if (!imgSrc) {
+            const imgElement = el.querySelector("img");
+            imgSrc = imgElement?.getAttribute("src") || null;
+          }
+
+          if (imgSrc?.startsWith("data:image/svg+xml")) {
+            imgSrc = null;
+          }
+
+          // Preia titlul și link-ul articolului
           const contentElement = el.querySelector(contentSelector);
           const link = contentElement ? contentElement.querySelector("a") : null;
 
@@ -112,21 +153,26 @@ const scrapeTags = async (page, tags, source) => {
             imgSrc: imgSrc,
             text: contentElement ? contentElement.textContent.trim() : null,
             href: link ? link.href : null,
+            category: category, // Adaugă categoria la rezultatele finale
           };
         }),
       contentSelector
     );
 
-    elements.forEach((element) => {
-      if (element.href && !seenLinks.has(element.href)) {
-        seenLinks.add(element.href);
-        results.push({ ...element, source });
-      }
-    });
+    elements
+      .filter((element) => element !== null) // Elimină articolele excluse
+      .forEach((element) => {
+        if (element.href && !seenLinks.has(element.href)) {
+          seenLinks.add(element.href);
+          results.push({ ...element, source });
+        }
+      });
   }
 
   return results;
 };
+
+
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {

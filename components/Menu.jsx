@@ -8,7 +8,7 @@ const Menu = ({ selectedSource, selectedCategory, handleFilter, handleCategoryFi
           <a href="/" style={{ letterSpacing: "-1px", color: "black" }}>
             <span style={{ paddingRight: "10px" }}>newsflow.ro</span> |
           </a>
-          <select onChange={(e) => handleCategoryFilter(e.target.value)} value={selectedCategory} style={{ background:"white" }}>
+          <select onChange={(e) => handleCategoryFilter(e.target.value)} value={selectedCategory} style={{ background:"white", color: "black" }}>
             <option value="Actualitate">Actualitate</option>
             <option value="Economie">Economie</option>
             <option value="Sport">Sport</option>
