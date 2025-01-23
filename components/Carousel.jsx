@@ -25,49 +25,50 @@ const Carousel = ({ items }) => {
         />          
         Ultima oră
         </div>
-      <Slider {...carouselSettings}>
-        {items.map((item, index) => (
-          <div key={index}>
-            <div
-              className="slick-art"
-            >
-              <img
-                src={item.imgSrc}
-                alt={item.text || "Image"}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "0px",
-                  left: "0px",
-                  color: "white",
-                  background: "linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0))",
-                  padding: "10px",
-                  minWidth: "100%",
-                }}
-              >
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: "none", color: "white" }}
+        <Slider {...carouselSettings}>
+          {items.map((item, index) => (
+            <div key={index}>
+              <div className="slick-art">
+                <img
+                  src={item.imgSrc}
+                  alt={item.text || "Image"}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "0px",
+                    left: "0px",
+                    color: "white",
+                    background:
+                      "linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0))",
+                    padding: "10px",
+                    minWidth: "100%",
+                  }}
                 >
-                  <strong style={{ display: "block", fontSize: "16px" }}>
-                    {item.source}
-                  </strong>
-                  <h3 style={{ margin: "5px 0" }}>{item.text}</h3>
-                </a>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: "none", color: "white" }}
+                  >
+                    <strong style={{ display: "block", fontSize: "16px" }}>
+                      {item.source}
+                    </strong>
+                    <h3 style={{ margin: "5px 0" }}>{item.text}</h3>
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </Slider>
+          ))}
+        </Slider>
+
+
     </div>
   );
 };

@@ -96,7 +96,15 @@ const sitesConfig = {
       { tag: "article.art", contentSelector: "h3.art-title" },      
     ],
     cat: "Monden",
-  },                  
+  }, 
+  ciao: {
+    url: "https://ciao.ro",
+    tags: [
+      { tag: "div.article", contentSelector: "h3.article__title" },
+      { tag: "div.article", contentSelector: "h2.article__title" },      
+    ],
+    cat: "Monden",
+  },                    
 };
 
 const gotoWithRetry = async (page, url, retries = 3) => {
@@ -220,11 +228,11 @@ export default async function handler(req, res) {
               "SELECT id FROM articles WHERE href = ?",
               [item.href]
             );
-
+          
             if (existing.length === 0) {
               await connection.query(
                 "INSERT INTO articles (source, text, href, imgSrc, cat) VALUES (?, ?, ?, ?, ?)",
-                [item.source, item.text, item.href, item.imgSrc, cat]
+                [item.source, item.text, item.href, item.imgSrc || null, cat] // Permite `imgSrc` să fie `null`
               );
               report.inserted += 1;
               report.details.push({ action: "inserted", item });
@@ -237,6 +245,7 @@ export default async function handler(req, res) {
               });
             }
           }
+          
 
           await page.close();
         } catch (siteError) {
