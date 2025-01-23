@@ -132,6 +132,7 @@ body {
   padding: 0 0 20px 20px;
   font-size: 12px;
   font-weight: 800;
+  color: black;
 }  
 
 .container img {
@@ -345,7 +346,7 @@ button {
   width: 400px;
   border-radius:10px;
   box-shadow: 0 0 2px lightgrey;
-  height: 400px !important;
+  height: 430px !important;
   width: 610px !important;
 }
 
@@ -357,7 +358,7 @@ button {
 
 .slick-art {
   background-size: cover !important;
-  height: 400px;
+  height: 430px;
   position: relative;
   border-radius: 10px;
   overflow: hidden;
@@ -399,7 +400,9 @@ button {
   display: none;
 }
 
-
+.slick-dots {
+  bottom: 10px !important;
+}
 
 
 /* top stiri dinamic  */
@@ -427,7 +430,21 @@ button {
 
 }
 
-
+.scroll-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #333;
+  color: #fff;
+  padding: 7px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 6px #0000001a;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+}
 
 
 @media only screen and (max-width: 600px) {
@@ -520,4 +537,64 @@ button {
 
 
 
+/*  dropdown fake  */
 
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-top: 2px !important;
+}
+
+.dropdown-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background-color: red !important;
+  color: white;
+  cursor: pointer;
+  justify-content: space-between;
+  min-width: 125px;
+  font-size: 15px;  
+}
+
+.dropdown-menu {
+  animation: fadeIn 0.3s ease;
+  position: absolute;
+  top: 100%;
+  left: 0px;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;
+  z-index: 1000;
+  width: 100%;
+  font-size: 13px;  
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown-item.active {
+  background-color: black;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

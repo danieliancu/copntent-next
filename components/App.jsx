@@ -13,6 +13,8 @@ const App = () => {
   const [selectedCategory, setSelectedCategory] = useState("Actualitate"); // Implicit "Actualitate"
   const [loading, setLoading] = useState(true);
   const [isRotated, setIsRotated] = useState(false); // Stare pentru rotația SVG-ului
+  const [showScrollTop, setShowScrollTop] = useState(false); // Stare pentru săgeata de scroll-top
+
 
   // const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
 
@@ -44,6 +46,23 @@ const App = () => {
     fetchAllData();
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 200) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleScrollTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };  
+
   const handleFilter = (source) => {
     setSelectedSource(source);
     filterData(source, selectedCategory);
@@ -53,6 +72,11 @@ const App = () => {
     setSelectedCategory(category);
     setSelectedSource("all"); // Resetează sursa la "all" când se schimbă categoria
     filterData("all", category); // Resetează filtrarea
+
+    // Derulează la începutul paginii
+    window.scrollTo({ top: 0, behavior: "smooth" });   
+    
+    setIsRotated(false); // Resetează rotația SVG-ului
   };
   
 
@@ -71,16 +95,31 @@ const App = () => {
     setFilteredData(filtered);
   };
 
+
   const getSourcesForCategory = () => {
-    const sourcesInCategory = new Set(
-      allData.filter((item) => item.cat === selectedCategory).map((item) => item.source)
-    );
-    return Array.from(sourcesInCategory);
+    // Filtrăm articolele pentru categoria selectată
+    const articlesInCategory = allData.filter((item) => item.cat === selectedCategory);
+  
+    // Filtrăm articolele cu imgSrc valid
+    const validArticles = articlesInCategory.filter((item) => item.imgSrc);
+  
+    // Numărăm articolele cu imagini pentru fiecare sursă
+    const sourceCounts = {};
+    validArticles.forEach((item) => {
+      sourceCounts[item.source] = (sourceCounts[item.source] || 0) + 1;
+    });
+  
+    // Returnăm sursele cu cel puțin 4 articole cu imgSrc valid
+    return Object.keys(sourceCounts).filter((source) => sourceCounts[source] >= 5);
   };
+  
+  
+  
+  
 
   
 
-  return (
+return (
 <div>
   <Menu
     selectedSource={selectedSource}
@@ -172,12 +211,29 @@ const App = () => {
                     } else if (diffMinutes === 1) {
                       return `Acum 1 minut`;
                     } else if (diffMinutes < 60) {
-                      return `Acum ${diffMinutes} minute`;
+                      return diffMinutes > 19
+                        ? `Acum ${diffMinutes} de minute`
+                        : `Acum ${diffMinutes} minute`;
                     } else {
                       const hours = Math.floor(diffMinutes / 60);
                       const minutes = diffMinutes % 60;
-                      return `Acum ${hours} ore și ${minutes} minute`;
-                    }
+                    
+                      const hourText =
+                        hours === 1
+                          ? "o oră"
+                          : hours === 2
+                          ? "două ore"
+                          : `${hours} ore`;
+                    
+                      const minuteText =
+                        minutes === 0
+                          ? ""
+                          : minutes > 19
+                          ? `${minutes} de minute`
+                          : `${minutes} minute`;
+                    
+                      return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
+                    }                    
                   })()}
                 </p>
               
@@ -229,12 +285,30 @@ const App = () => {
                         } else if (diffMinutes === 1) {
                           return `Acum 1 minut`;
                         } else if (diffMinutes < 60) {
-                          return `Acum ${diffMinutes} minute`;
+                          return diffMinutes > 19
+                            ? `Acum ${diffMinutes} de minute`
+                            : `Acum ${diffMinutes} minute`;
                         } else {
                           const hours = Math.floor(diffMinutes / 60);
                           const minutes = diffMinutes % 60;
-                          return `Acum ${hours} ore și ${minutes} minute`;
+                        
+                          const hourText =
+                            hours === 1
+                              ? "o oră"
+                              : hours === 2
+                              ? "două ore"
+                              : `${hours} ore`;
+                        
+                          const minuteText =
+                            minutes === 0
+                              ? ""
+                              : minutes > 19
+                              ? `${minutes} de minute`
+                              : `${minutes} minute`;
+                        
+                          return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
                         }
+                        
                       })()}
                     </p>
               </a>
@@ -243,9 +317,13 @@ const App = () => {
         ))}
     </div>
   )}
-</div>
 
+  {/* Săgeata scroll-top */}
+  {showScrollTop && (
+    <div onClick={handleScrollTop} className="scroll-top" title="Scroll to top">▲</div>
+  )}
 
+  </div>
   );
 };
 

@@ -1,21 +1,67 @@
-import React from "react";
+import React, { useState } from "react";
 
-const Menu = ({ selectedSource, selectedCategory, handleFilter, handleCategoryFilter, availableSources }) => {
+const Menu = ({
+  selectedSource,
+  selectedCategory,
+  handleFilter,
+  handleCategoryFilter,
+  availableSources,
+}) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false); // Controlăm starea dropdown-ului
+  const categories = ["Actualitate", "Economie", "Sport", "Sănătate", "Monden"];
+
+  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
+
   return (
     <div className="menu">
-      <div>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <h1 className="logo">
           <a href="/" style={{ letterSpacing: "-1px", color: "black" }}>
-            <span style={{ paddingRight: "10px" }}>newsflow.ro</span> |
+            <span style={{ paddingRight: "10px" }}>newsflow.ro</span> 
           </a>
-          <select onChange={(e) => handleCategoryFilter(e.target.value)} value={selectedCategory} style={{ background:"white", color: "black" }}>
-            <option value="Actualitate">Actualitate</option>
-            <option value="Economie">Economie</option>
-            <option value="Sport">Sport</option>
-            <option value="Sănătate">Sănătate</option>
-            <option value="Monden">Monden</option>
-          </select>
         </h1>
+        <div className="dropdown">
+          <div
+            className="dropdown-trigger"
+            onClick={toggleDropdown}
+          >
+            {selectedCategory}
+            <span
+              style={{
+                marginLeft: "10px",
+                transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)",
+                transition: "transform 0.2s ease",
+              }}
+            >
+              ▼
+            </span>
+          </div>
+          {dropdownOpen && (
+            <div className="dropdown-menu">
+              {categories.map((category) => (
+                <div
+                  key={category}
+                  onClick={() => {
+                    handleCategoryFilter(category);
+                    setDropdownOpen(false); // Închide dropdown-ul după selecție
+                  }}
+                  style={{
+                    padding: "10px",
+                    cursor: "pointer",
+                    backgroundColor:
+                      selectedCategory === category ? "black" : "white",
+                    color: selectedCategory === category ? "white" : "black",
+                  }}
+                  className={`dropdown-item ${
+                    selectedCategory === category ? "active" : ""
+                  }`}
+                >
+                  {category}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <div>
         <button
