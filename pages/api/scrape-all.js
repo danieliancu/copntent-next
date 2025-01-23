@@ -151,7 +151,8 @@ const scrapeTags = async (page, tags, source) => {
             imgSrc = imgElement?.getAttribute("src") || null;
           }
 
-          if (imgSrc?.startsWith("data:image/svg+xml")) {
+          // Exclude imaginile inline sau cele de tip Base64
+          if (imgSrc?.startsWith("data:image")) {
             imgSrc = null;
           }
 
@@ -190,25 +191,35 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const report = { totalScraped: 0, inserted: 0, skipped: 0, details: [] };
+  const report = { totalScraped: 0, inserted: 0, skipped: 0, deleted: 0, details: [] };
 
   try {
     const browser = await puppeteer.launch({ headless: true });
 
-    for (const source in sitesConfig) {
-      const { url, tags, cat } = sitesConfig[source];
+    const connection = await pool.getConnection();
+    try {
+      // Șterge intrările mai vechi de 24 de ore și actualizează raportul
+      const [deleteResult] = await connection.query(
+        "DELETE FROM articles WHERE date < NOW() - INTERVAL 1 DAY"
+      );
+      report.deleted = deleteResult.affectedRows;
 
-      try {
-        const page = await browser.newPage();
-        await gotoWithRetry(page, url);
+      // Continuă cu scraping-ul
+      for (const source in sitesConfig) {
+        const { url, tags, cat } = sitesConfig[source];
 
-        const scrapedData = await scrapeTags(page, tags, source);
-        report.totalScraped += scrapedData.length;
-
-        const connection = await pool.getConnection();
         try {
+          const page = await browser.newPage();
+          await gotoWithRetry(page, url);
+
+          const scrapedData = await scrapeTags(page, tags, source);
+          report.totalScraped += scrapedData.length;
+
           for (const item of scrapedData) {
-            const [existing] = await connection.query("SELECT id FROM articles WHERE href = ?", [item.href]);
+            const [existing] = await connection.query(
+              "SELECT id FROM articles WHERE href = ?",
+              [item.href]
+            );
 
             if (existing.length === 0) {
               await connection.query(
@@ -219,17 +230,21 @@ export default async function handler(req, res) {
               report.details.push({ action: "inserted", item });
             } else {
               report.skipped += 1;
-              report.details.push({ action: "skipped", reason: "Already exists", item });
+              report.details.push({
+                action: "skipped",
+                reason: "Already exists",
+                item,
+              });
             }
           }
-        } finally {
-          connection.release(); // Asigură-te că eliberezi conexiunea
-        }
 
-        await page.close();
-      } catch (siteError) {
-        console.error(`Error scraping site ${source}:`, siteError.message);
+          await page.close();
+        } catch (siteError) {
+          console.error(`Error scraping site ${source}:`, siteError.message);
+        }
       }
+    } finally {
+      connection.release(); // Asigură-te că eliberezi conexiunea
     }
 
     await browser.close();
@@ -238,9 +253,11 @@ export default async function handler(req, res) {
     console.log(`- Total articles scraped: ${report.totalScraped}`);
     console.log(`- Total articles inserted: ${report.inserted}`);
     console.log(`- Total articles skipped: ${report.skipped}`);
+    console.log(`- Total articles deleted: ${report.deleted}`);
+
     res.json({
       message: "Scraping completed.",
-      report: { totalScraped: report.totalScraped, inserted: report.inserted, skipped: report.skipped },
+      report,
     });
   } catch (error) {
     console.error("Error in scraping:", error.message);
