@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import Carousel from "./Carousel";
 import Menu from "./Menu";
 
+
+
+
 const App = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -9,8 +12,13 @@ const App = () => {
   const [selectedSource, setSelectedSource] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("Actualitate"); // Implicit "Actualitate"
   const [loading, setLoading] = useState(true);
+  const [isRotated, setIsRotated] = useState(false); // Stare pentru rotația SVG-ului
 
   // const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
+
+  const handleSvgClick = () => {
+    setIsRotated((prev) => !prev); // Inversează starea
+  };  
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -70,6 +78,8 @@ const App = () => {
     return Array.from(sourcesInCategory);
   };
 
+  
+
   return (
 <div>
   <Menu
@@ -101,8 +111,40 @@ const App = () => {
         />
       )}
       {filteredData.filter((item) => !item.imgSrc).length > 0 && ( // Verificăm dacă există articole fără imgSrc
+        
         <div className="container-news container-news-no-img">
-          <div className="container-news-no-img-top">Top știri</div>
+          <div className="container-news-no-img-top">
+            Top știri
+            <span
+            className="caret-news-top"
+            onClick={handleSvgClick} // Adaugă handler-ul de click
+            style={{ cursor: "pointer" }} // Pointer pentru interacțiune
+          >
+            <svg
+              width="13"
+              height="13"
+              xmlns="http://www.w3.org/2000/svg"
+              className={isRotated ? "rotated" : ""} // Adaugă clasa în funcție de stare
+            >
+              <polygon points="6,0 0,12 12,12" fill="white" />
+            </svg>
+            <span
+              style={{
+                  fontSize:"14px",
+                  textTransform:"lowercase",
+                  fontWeight:"lighter",
+                  paddingLeft:"5px"
+              }}>
+              (click pentru {isRotated ? "a ascunde" : "a vizualiza"})
+              </span>
+          </span>
+          </div>
+
+          <div
+          className={`news-item-container ${
+            isRotated ? "show-items" : "hide-items"
+          }`} // top stiri dinamic
+          >
           {filteredData
             .filter((item) => !item.imgSrc) // Elemente fără imgSrc
             .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -150,6 +192,7 @@ const App = () => {
                 )}
               </div>
             ))}
+        </div>
         </div>
       )}
       {filteredData

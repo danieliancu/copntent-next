@@ -1,3 +1,5 @@
+const cron = require('node-cron'); // Import library for scheduling
+
 import puppeteer from "puppeteer";
 import mysql from "mysql2/promise";
 
@@ -194,82 +196,62 @@ const scrapeTags = async (page, tags, source) => {
 
 
 
-export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
-
-  const report = { totalScraped: 0, inserted: 0, skipped: 0, deleted: 0, details: [] };
+// Function to run the scraping logic
+async function scrapingLogic() {
+  const browser = await puppeteer.launch({ headless: true });
+  const connection = await pool.getConnection();
 
   try {
-    const browser = await puppeteer.launch({ headless: true });
+    // Șterge intrările mai vechi de 24 de ore și actualizează raportul
+    const [deleteResult] = await connection.query(
+      "DELETE FROM articles WHERE date < NOW() - INTERVAL 1 DAY"
+    );
+    console.log(`Deleted ${deleteResult.affectedRows} old articles.`);
 
-    const connection = await pool.getConnection();
-    try {
-      // Șterge intrările mai vechi de 24 de ore și actualizează raportul
-      const [deleteResult] = await connection.query(
-        "DELETE FROM articles WHERE date < NOW() - INTERVAL 1 DAY"
-      );
-      report.deleted = deleteResult.affectedRows;
+    // Loop through each source in sitesConfig
+    for (const source in sitesConfig) {
+      const { url, tags, cat } = sitesConfig[source];
 
-      // Continuă cu scraping-ul
-      for (const source in sitesConfig) {
-        const { url, tags, cat } = sitesConfig[source];
+      try {
+        const page = await browser.newPage();
+        await gotoWithRetry(page, url);
 
-        try {
-          const page = await browser.newPage();
-          await gotoWithRetry(page, url);
+        const scrapedData = await scrapeTags(page, tags, source);
 
-          const scrapedData = await scrapeTags(page, tags, source);
-          report.totalScraped += scrapedData.length;
+        for (const item of scrapedData) {
+          const [existing] = await connection.query(
+            "SELECT id FROM articles WHERE href = ?",
+            [item.href]
+          );
 
-          for (const item of scrapedData) {
-            const [existing] = await connection.query(
-              "SELECT id FROM articles WHERE href = ?",
-              [item.href]
+          if (existing.length === 0) {
+            await connection.query(
+              "INSERT INTO articles (source, text, href, imgSrc, cat) VALUES (?, ?, ?, ?, ?)",
+              [item.source, item.text, item.href, item.imgSrc || null, cat]
             );
-          
-            if (existing.length === 0) {
-              await connection.query(
-                "INSERT INTO articles (source, text, href, imgSrc, cat) VALUES (?, ?, ?, ?, ?)",
-                [item.source, item.text, item.href, item.imgSrc || null, cat] // Permite `imgSrc` să fie `null`
-              );
-              report.inserted += 1;
-              report.details.push({ action: "inserted", item });
-            } else {
-              report.skipped += 1;
-              report.details.push({
-                action: "skipped",
-                reason: "Already exists",
-                item,
-              });
-            }
+            console.log(`Inserted article: ${item.text}`);
+          } else {
+            console.log(`Skipped article (already exists): ${item.text}`);
           }
-          
-
-          await page.close();
-        } catch (siteError) {
-          console.error(`Error scraping site ${source}:`, siteError.message);
         }
+
+        await page.close();
+      } catch (siteError) {
+        console.error(`Error scraping site ${source}:`, siteError.message);
       }
-    } finally {
-      connection.release(); // Asigură-te că eliberezi conexiunea
     }
-
-    await browser.close();
-
-    console.log("\nScraping Report:");
-    console.log(`- Total articles scraped: ${report.totalScraped}`);
-    console.log(`- Total articles inserted: ${report.inserted}`);
-    console.log(`- Total articles skipped: ${report.skipped}`);
-    console.log(`- Total articles deleted: ${report.deleted}`);
-
-    res.json({
-      message: "Scraping completed.",
-      report,
-    });
-  } catch (error) {
-    console.error("Error in scraping:", error.message);
-    res.status(500).json({ error: "Scraping failed" });
+  } finally {
+    connection.release();
+    browser.close();
   }
 }
+
+// Schedule the scraping job to run every 5 minutes
+cron.schedule('*/5 * * * *', async () => {
+  console.log('Starting scraping job at', new Date());
+  await scrapingLogic();
+});
+
+// This line is not necessary in a server-side Node.js script
+// You can remove it if you plan to deploy this code to a server.
+// scrapingLogic(); // uncomment to run scraping logic manually
