@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/* Personalizare scrollbar */
+::-webkit-scrollbar {
+  width: 10px; /* Lățimea barei de scroll */
+  height: 10px; /* Înălțimea barei de scroll orizontale */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888; /* Culoarea barei */
+  border-radius: 10px; /* Colțuri rotunjite */
+  border: 2px solid transparent; /* Spațiu între thumb și track */
+  background-clip: padding-box; /* Stil rotunjit */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Fundalul track-ului */
+  border-radius: 10px; /* Colțuri rotunjite pentru track */
+}
+
+/* Stil pentru hover pe thumb */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Culoare mai închisă la hover */
+}
+
+
+
+
 :root {
   --background:#f0f0f0;
   --foreground: #171717;
@@ -117,8 +144,6 @@ body {
 .container-news-no-img {
   height: 430px;
   overflow: auto;
-  background-color: lightpink;
-  border-radius: 0;
 }
 
 .container-news-no-img h3 {
@@ -139,7 +164,7 @@ body {
 .container-news-no-img .ago {
   display: inline;
   font-weight:700;
-  color: grey;
+  color: black;
 }
 
 .container-news-no-img .ago {
@@ -158,7 +183,7 @@ padding-left:0;
 }
 
 .container-news-no-img .news-item {
-  border-bottom: .1px solid white;
+  border-bottom: .1px solid lightgrey;
   padding-top:10px;
 }
 
@@ -375,8 +400,45 @@ button {
 }
 
 
+
+
+/* top stiri dinamic  */
+
+.caret-news-top svg {
+  transition: transform 0.3s ease; /* Animația rotației */
+}
+
+.caret-news-top svg.rotated {
+  transform: rotate(180deg); /* Rotește SVG-ul cu 180 de grade */
+}
+
+.news-item-container {
+  overflow: hidden; /* Ascunde conținutul */
+  max-height: 0; /* Înălțimea inițială este 0 */
+  transition: max-height 0.3s ease; /* Animația pentru toggle */
+}
+
+.news-item-container.show-items {
+  max-height: unset; /* Permite afișarea conținutului */
+}
+
+.news-item-container.hide-items {
+  max-height: unset; /* Ascunde conținutul */
+
+}
+
+
+
+
 @media only screen and (max-width: 600px) {
 
+  .news-item-container.hide-items {
+    max-height: 0; /* Ascunde conținutul */
+  }
+
+  .news-item-container.show-items {
+    max-height: 100%; /* Permite afișarea conținutului */
+  }
 
   .caret-news-top {
     vertical-align: text-bottom;
@@ -459,26 +521,3 @@ button {
 
 
 
-/* top stiri dinamic  */
-
-.caret-news-top svg {
-  transition: transform 0.3s ease; /* Animația rotației */
-}
-
-.caret-news-top svg.rotated {
-  transform: rotate(180deg); /* Rotește SVG-ul cu 180 de grade */
-}
-
-.news-item-container {
-  overflow: hidden; /* Ascunde conținutul */
-  max-height: 0; /* Înălțimea inițială este 0 */
-  transition: max-height 0.3s ease; /* Animația pentru toggle */
-}
-
-.news-item-container.show-items {
-  max-height: 1000px; /* Permite afișarea conținutului */
-}
-
-.news-item-container.hide-items {
-  max-height: 0; /* Ascunde conținutul */
-}
