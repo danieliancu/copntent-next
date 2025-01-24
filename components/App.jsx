@@ -45,6 +45,10 @@ const App = () => {
 
     fetchAllData();
   }, []);
+  
+
+
+  
 
   useEffect(() => {
     const handleScroll = () => {
