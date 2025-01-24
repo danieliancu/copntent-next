@@ -26,7 +26,7 @@ const App = () => {
     const fetchAllData = async () => {
       setLoading(true); // Afișează spinnerul
       try {
-        const response = await fetch("/api/articles");
+        const response = await fetch(process.env.NEXT_PUBLIC_API_URL || "/api/articles");
         const result = await response.json();
 
         if (response.ok) {
