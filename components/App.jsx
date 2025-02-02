@@ -3,7 +3,7 @@ import Carousel from "./Carousel";
 import Menu from "./Menu";
 import Top from "./Top";
 import Footer from "./Footer";
-import { FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { FaToggleOn, FaToggleOff, FaSync } from "react-icons/fa";
 
 const App = () => {
   const [allData, setAllData] = useState([]);
@@ -17,7 +17,6 @@ const App = () => {
   // Starea pentru numărul de articole cu imagine afișate (după cele 4 din Carousel)
   const [visibleImageNewsCount, setVisibleImageNewsCount] = useState(20);
   const [isAutoplay, setIsAutoplay] = useState(true);
-
 
   useEffect(() => {
     let intervalId;
@@ -41,15 +40,27 @@ const App = () => {
       clearInterval(intervalId);
     };
   }, [isAutoplay]);
-  
-
-
-
 
   // Funcția de toggle: inversează starea curentă
   const toggleAutoplay = () => {
     setIsAutoplay((prevState) => !prevState);
   };
+
+  // Funcția de reset: readuce containerul cu news-item la poziția inițială
+const handleReset = () => {
+  // Oprește autoplay-ul
+  setIsAutoplay(false);
+
+  const container = document.querySelector('.news-item-container');
+  if (container) {
+    container.style.top = '0';
+  }
+
+  // Pornește din nou autoplay-ul după un scurt delay, pentru a permite resetarea
+  setTimeout(() => {
+    setIsAutoplay(true);
+  }, 100); // delay de 100ms (poți ajusta dacă este necesar)
+};
 
   const handleSvgClick = () => {
     setIsRotated((prev) => !prev); // Inversează starea de rotație
@@ -156,29 +167,32 @@ const App = () => {
         handleCategoryFilter={handleCategoryFilter}
         availableSources={getSourcesForCategory()}
       />
+      
       {loading && (
         <div className="loading">
           <div className="spinner"></div>
         </div>
       )}
+      
       {!loading && error && (
         <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
           <h3>Error:</h3>
           <p>{error}</p>
         </div>
       )}
+      
       {!loading && filteredData.length > 0 && (
         <div className="container grid-layout">
           {/* Dacă există cel puțin 5 articole cu imagine, afișăm Carousel-ul cu primele 4 */}
           {sortedImageNews.length > 4 && (
             <Carousel key={selectedSource} items={sortedImageNews.slice(0, 4)} />
           )}
+          
           {/* Secțiunea pentru articolele fără imagine */}
           {filteredData.filter((item) => !item.imgSrc).length > 0 && (
             <div className="container-news container-news-no-img">
               <div className="container-news-no-img-top">
-
-              <span
+                <span
                   className="caret-news-top"
                   onClick={handleSvgClick}
                   style={{ cursor: "pointer" }}
@@ -202,11 +216,13 @@ const App = () => {
                     Apasă pentru {isRotated ? "a ascunde" : "a vizualiza"} newsflow
                   </span>
                 </span>
-
                 
                 <span className="top-top">
-                  <span style={{ color:"#d80000" }}>newsflow</span>
-                  <span onClick={toggleAutoplay} style={{ cursor: "pointer" }}>
+                  <span style={{ color: "#d80000" }}>newsflow</span>
+                  <span
+                    onClick={toggleAutoplay}
+                    style={{ cursor: "pointer", marginLeft: "10px" }}
+                  >
                     autoplay{" "}
                     {isAutoplay ? (
                       <FaToggleOn
@@ -222,26 +238,42 @@ const App = () => {
                           display: "inline-block",
                           fontSize: "18px",
                           verticalAlign: "bottom",
-                          color:"grey"
+                          color: "grey",
                         }}
                       />
                     )}
                   </span>
-                </span>
+                  {/* Butonul de reset */}
 
-                
+                  <span
+                    onClick={handleReset}
+                    style={{ cursor: "pointer", marginLeft: "10px" }}
+                    title="Reset newsflow"
+                  >
+                    TOP
+                    <svg
+                    style={{ display: "inline-block", verticalAlign: "text-top" }}
+                    width="12"
+                    height="12"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <polygon points="6,0 0,12 12,12" fill="black" />
+                  </svg>
+                  </span>
+                </span>
               </div>
+              
               <div className={`news-item-container ${isRotated ? "show-items" : "hide-items"}`}>
                 {filteredData
                   .filter((item) => !item.imgSrc)
                   .sort((a, b) => new Date(b.date) - new Date(a.date))
                   .map((item, index) => (
-                    <div className="news-item" key={index} style={{ borderLeft:".5px solid #d80000" }}>
+                    <div className="news-item" key={index} style={{ borderLeft: ".5px solid #d80000" }}>
                       <span className="bumb bumbSpecial">&#8226;</span>
                       {selectedSource === "all" && (
                         <strong className="news-source">{item.source}</strong>
                       )}
-                      <span className="bumb" style={{ verticalAlign:"middle" }}>&#8226;</span>
+                      <span className="bumb" style={{ verticalAlign: "middle" }}>&#8226;</span>
                       <p
                         className="ago"
                         style={{
@@ -290,6 +322,7 @@ const App = () => {
               </div>
             </div>
           )}
+          
           {/* Afișăm articolele cu imagine care NU fac parte din Carousel */}
           {sortedImageNews.length > 4 ? (
             <>
@@ -344,7 +377,7 @@ const App = () => {
                   )}
                 </div>
               ))}
-              {/* Dacă mai există articole de afișat, se arată butonul de "Vezi mai multe stiri" */}
+              {/* Dacă mai există articole de afișat, se arată butonul de "Vezi mai multe știri" */}
               {sortedImageNews.length > visibleImageNewsCount && (
                 <button onClick={handleLoadMore} className="load-more-button">
                   Vezi mai multe știri
@@ -399,24 +432,22 @@ const App = () => {
                           return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
                         }
                       })()}
-
                     </p>
-
                   </a>
-
                 )}
               </div>
             ))
           )}
         </div>
       )}
+      
       {showScrollTop && (
         <div onClick={handleScrollTop} className="scroll-top" title="Scroll to top">
           ▲
         </div>
       )}
-          <Footer />
-
+      
+      {!loading && <Footer />}
     </div>
   );
 };
