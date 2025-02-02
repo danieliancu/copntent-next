@@ -8,23 +8,24 @@ const Carousel = ({ items }) => {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 1,
+    slidesToShow: 3,
     slidesToScroll: 1,
     arrows: true,
     autoplay: true,
     autoplaySpeed: 5000,
+    responsive: [
+      {
+        breakpoint: 600, // La ecrane cu lățimea mai mică de 600px
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
   };
 
   return (
-    <div className="container-all-carousel" style={{ marginBottom: "20px" }}>
-      <div className="ultima-ora">
-      <img
-          src="/images/giphy_transparent.gif"
-          alt="Loading"
-          className="giphy"
-        />          
-        Ultima oră
-        </div>
+    <div className="container-all-carousel">
         <Slider {...carouselSettings}>
           {items.map((item, index) => (
             <div key={index}>
@@ -39,28 +40,50 @@ const Carousel = ({ items }) => {
                     display: "block",
                   }}
                 />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "0px",
-                    left: "0px",
-                    color: "white",
-                    background:
-                      "linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0))",
-                    padding: "10px",
-                    minWidth: "100%",
-                  }}
-                >
+
+                <div className="degrade">
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ textDecoration: "none", color: "white" }}
                   >
-                    <strong style={{ display: "block", fontSize: "16px" }}>
-                      {item.source}
-                    </strong>
                     <h3 style={{ margin: "5px 0" }}>{item.text}</h3>
+                    <p className="ago" style={{ color:"white", fontSize:"12px" }}>
+                      <strong className="news-source" style={{ padding:"0" }}>{item.source}</strong>
+                      <span className="bumb">&#8226;</span>
+                      {(() => {
+                          const now = new Date();
+                          const date = new Date(item.date);
+                          const diffMs = now - date;
+                          const diffMinutes = Math.floor(diffMs / 60000);
+                          if (diffMinutes === 0) {
+                            return `Chiar acum`;
+                          } else if (diffMinutes === 1) {
+                            return `Acum 1 minut`;
+                          } else if (diffMinutes < 60) {
+                            return diffMinutes > 19
+                              ? `Acum ${diffMinutes} de minute`
+                              : `Acum ${diffMinutes} minute`;
+                          } else {
+                            const hours = Math.floor(diffMinutes / 60);
+                            const minutes = diffMinutes % 60;
+                            const hourText =
+                              hours === 1
+                                ? "o oră"
+                                : hours === 2
+                                ? "două ore"
+                                : `${hours} ore`;
+                            const minuteText =
+                              minutes === 0
+                                ? ""
+                                : minutes > 19
+                                ? `${minutes} de minute`
+                                : `${minutes} minute`;
+                            return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
+                          }
+                        })()}
+                    </p>
                   </a>
                 </div>
               </div>

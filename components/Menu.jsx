@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaTimes } from "react-icons/fa";
 
 const Menu = ({
   selectedSource,
@@ -7,79 +8,105 @@ const Menu = ({
   handleCategoryFilter,
   availableSources,
 }) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false); // Controlăm starea dropdown-ului
+  const [menuOpen, setMenuOpen] = useState(false); // Starea pentru meniu
   const categories = ["Actualitate", "Economie", "Sport", "Sănătate", "Monden"];
+  
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 766) {
+        setMenuOpen(true);
+      } else {
+        setMenuOpen(false);
+      }
+    };
+  
+    // Setăm valoarea inițială
+    handleResize();
+  
+    // Adăugăm și curățăm listener-ul
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  
+  
 
-  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
 
   return (
     <div className="menu">
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <h1 className="logo">
-          <a href="/" style={{ letterSpacing: "-1px", color: "black" }}>
-            <span style={{ paddingRight: "10px" }}>newsflow.ro</span> 
-          </a>
-        </h1>
-        <div className="dropdown">
-          <div
-            className="dropdown-trigger"
-            onClick={toggleDropdown}
-          >
-            {selectedCategory}
-            <span
-              style={{
-                marginLeft: "10px",
-                transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)",
-                transition: "transform 0.2s ease",
-              }}
-            >
-              ▼
-            </span>
-          </div>
-          {dropdownOpen && (
-            <div className="dropdown-menu">
-              {categories.map((category) => (
-                <div
-                  key={category}
-                  onClick={() => {
-                    handleCategoryFilter(category);
-                    setDropdownOpen(false); // Închide dropdown-ul după selecție
-                  }}
-                  style={{
-                    padding: "10px",
-                    cursor: "pointer",
-                    backgroundColor:
-                      selectedCategory === category ? "black" : "white",
-                    color: selectedCategory === category ? "white" : "black",
-                  }}
-                  className={`dropdown-item ${
-                    selectedCategory === category ? "active" : ""
-                  }`}
-                >
-                  {category}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-      <div>
-        <button
-          style={{ color: "red", padding: "0 10px" }}
-          onClick={() => handleFilter("all")}
-          className={selectedSource === "all" ? "active" : ""}
+      <div className="menu-container">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            justifyContent: "space-between",
+            position: "relative",
+          }}
         >
-          Toate sursele
-        </button>
-        {availableSources.map((source) => (
-          <button
-            key={source}
-            onClick={() => handleFilter(source)}
-            className={selectedSource === source ? "active" : ""}
+          <h1 className="logo">
+            <img
+              src="/images/giphy_transparent.gif"
+              alt="Loading"
+              className="giphy"
+            />
+            <a href="/">
+              newsflow<span style={{ color: "#d80000" }}>.ro</span>
+            </a>
+          </h1>
+          
+          {/* Afișăm FaBars sau FaTimes în funcție de starea meniului */}
+          {menuOpen ? (
+            <FaTimes className="hamburger" onClick={toggleMenu} />
+          ) : (
+            <FaBars className="hamburger" onClick={toggleMenu} />
+          )}
+          
+          {/* Afișăm meniul dacă starea este deschisă */}
+          <div
+            className="menu-categories"
+            style={{ display: menuOpen ? "block" : "none" }}
           >
-            {source}
+            {categories.map((category) => (
+              <div
+                key={category}
+                onClick={() => handleCategoryFilter(category)}
+                style={{
+                  borderBottom:
+                    selectedCategory === category ? "4px solid #d80000" : "none",
+                }}
+                className={`menu-item ${
+                  selectedCategory === category ? "active" : ""
+                }`}
+              >
+                {category}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* hidden deocamdata */}
+        <div style={{ display: "none" }}>
+          <button
+            style={{ color: "red", padding: "0 10px" }}
+            onClick={() => handleFilter("all")}
+            className={selectedSource === "all" ? "active" : ""}
+          >
+            Toate sursele
           </button>
-        ))}
+          {availableSources.map((source) => (
+            <button
+              key={source}
+              onClick={() => handleFilter(source)}
+              className={selectedSource === source ? "active" : ""}
+            >
+              {source}
+            </button>
+          ))}
+        </div>
+        {/* hidden deocamdata */}
       </div>
     </div>
   );

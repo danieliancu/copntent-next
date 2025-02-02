@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Carousel from "./Carousel";
 import Menu from "./Menu";
-
-
-
+import Top from "./Top";
+import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 
 const App = () => {
   const [allData, setAllData] = useState([]);
@@ -14,13 +13,18 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [isRotated, setIsRotated] = useState(false); // Stare pentru rotația SVG-ului
   const [showScrollTop, setShowScrollTop] = useState(false); // Stare pentru săgeata de scroll-top
+  // Starea pentru numărul de articole cu imagine afișate (după cele 4 din Carousel)
+  const [visibleImageNewsCount, setVisibleImageNewsCount] = useState(20);
+  const [isAutoplay, setIsAutoplay] = useState(false);
 
-
-  // const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
+  // Funcția de toggle: inversează starea curentă
+  const toggleAutoplay = () => {
+    setIsAutoplay((prevState) => !prevState);
+  };
 
   const handleSvgClick = () => {
-    setIsRotated((prev) => !prev); // Inversează starea
-  };  
+    setIsRotated((prev) => !prev); // Inversează starea de rotație
+  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -30,9 +34,9 @@ const App = () => {
         const result = await response.json();
 
         if (response.ok) {
-          // const shuffledData = shuffleArray(result.data);
           setAllData(result.data);
-          filterData("all", "Actualitate", result.data); // Filtrare implicită la încărcare
+          // Filtrare implicită la încărcare
+          filterData("all", "Actualitate", result.data);
         } else {
           setError(result.error || "Failed to fetch data");
         }
@@ -61,7 +65,7 @@ const App = () => {
 
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };  
+  };
 
   const handleFilter = (source) => {
     setSelectedSource(source);
@@ -71,17 +75,13 @@ const App = () => {
   const handleCategoryFilter = (category) => {
     setSelectedCategory(category);
     setSelectedSource("all"); // Resetează sursa la "all" când se schimbă categoria
-    filterData("all", category); // Resetează filtrarea
-
-    // Derulează la începutul paginii
-    window.scrollTo({ top: 0, behavior: "smooth" });   
-    
+    filterData("all", category);
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setIsRotated(false); // Resetează rotația SVG-ului
   };
-  
 
+  // Filtrare în funcție de sursă și categorie – se resetează și numărul de articole vizibile
   const filterData = (source, category, data = allData) => {
-
     let filtered = data;
 
     if (source !== "all") {
@@ -93,193 +93,257 @@ const App = () => {
     }
 
     setFilteredData(filtered);
+    // Resetăm contorul de paginare la fiecare filtrare nouă
+    setVisibleImageNewsCount(20);
   };
 
-
   const getSourcesForCategory = () => {
-    // Filtrăm articolele pentru categoria selectată
     const articlesInCategory = allData.filter((item) => item.cat === selectedCategory);
-  
-    // Filtrăm articolele cu imgSrc valid
     const validArticles = articlesInCategory.filter((item) => item.imgSrc);
-  
-    // Numărăm articolele cu imagini pentru fiecare sursă
     const sourceCounts = {};
     validArticles.forEach((item) => {
       sourceCounts[item.source] = (sourceCounts[item.source] || 0) + 1;
     });
-  
-    // Returnăm sursele cu cel puțin 4 articole cu imgSrc valid
     return Object.keys(sourceCounts).filter((source) => sourceCounts[source] >= 5);
   };
-  
-  
-  
-  
 
-  
+  // Handler pentru butonul de "Vezi mai multe stiri"
+  const handleLoadMore = () => {
+    setVisibleImageNewsCount((prevCount) => prevCount + 20);
+  };
 
-return (
-<div>
-  <Menu
-    selectedSource={selectedSource}
-    selectedCategory={selectedCategory}
-    handleFilter={handleFilter}
-    handleCategoryFilter={handleCategoryFilter}
-    availableSources={getSourcesForCategory()}
-  />
-  {loading && (
-    <div className="loading">
-      <div className="spinner"></div>
-    </div>
-  )}
-  {!loading && error && (
-    <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
-      <h3>Error:</h3>
-      <p>{error}</p>
-    </div>
-  )}
-  {!loading && filteredData.length > 0 && (
-    <div className="container grid-layout">
-      {filteredData.filter((item) => item.imgSrc).length > 4 && (
-        <Carousel
-          key={selectedSource}
-          items={filteredData
-            .filter((item) => item.imgSrc) // Filtrăm articolele cu imgSrc valid
-            .slice(0, 4)} // Limităm la primele 4 articole
-        />
+  // Calculăm lista articolelor cu imagini și le sortăm descrescător după dată
+  const sortedImageNews = filteredData
+    .filter((item) => item.imgSrc)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  return (
+    <div>
+      <Top />
+      <Menu
+        selectedSource={selectedSource}
+        selectedCategory={selectedCategory}
+        handleFilter={handleFilter}
+        handleCategoryFilter={handleCategoryFilter}
+        availableSources={getSourcesForCategory()}
+      />
+      {loading && (
+        <div className="loading">
+          <div className="spinner"></div>
+        </div>
       )}
-      {filteredData.filter((item) => !item.imgSrc).length > 0 && ( // Verificăm dacă există articole fără imgSrc
-        
-        <div className="container-news container-news-no-img">
-          <div className="container-news-no-img-top">
-            Top știri
-            <span
-            className="caret-news-top"
-            onClick={handleSvgClick} // Adaugă handler-ul de click
-            style={{ cursor: "pointer" }} // Pointer pentru interacțiune
-          >
-            <svg
-              width="13"
-              height="13"
-              xmlns="http://www.w3.org/2000/svg"
-              className={isRotated ? "rotated" : ""} // Adaugă clasa în funcție de stare
-            >
-              <polygon points="6,0 0,12 12,12" fill="white" />
-            </svg>
-            <span
-              style={{
-                  fontSize:"14px",
-                  textTransform:"lowercase",
-                  fontWeight:"lighter",
-                  paddingLeft:"5px"
-              }}>
-              (click pentru {isRotated ? "a ascunde" : "a vizualiza"})
-              </span>
-          </span>
-          </div>
+      {!loading && error && (
+        <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
+          <h3>Error:</h3>
+          <p>{error}</p>
+        </div>
+      )}
+      {!loading && filteredData.length > 0 && (
+        <div className="container grid-layout">
+          {/* Dacă există cel puțin 5 articole cu imagine, afișăm Carousel-ul cu primele 4 */}
+          {sortedImageNews.length > 4 && (
+            <Carousel key={selectedSource} items={sortedImageNews.slice(0, 4)} />
+          )}
+          {/* Secțiunea pentru articolele fără imagine */}
+          {filteredData.filter((item) => !item.imgSrc).length > 0 && (
+            <div className="container-news container-news-no-img">
+              <div className="container-news-no-img-top">
 
-          <div
-          className={`news-item-container ${
-            isRotated ? "show-items" : "hide-items"
-          }`} // top stiri dinamic
-          >
-          {filteredData
-            .filter((item) => !item.imgSrc) // Elemente fără imgSrc
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .map((item, index) => (
-              <div className="news-item" key={index}>
-                
-                {selectedSource === "all" && (
-                  <strong className="news-source">{item.source} | </strong>
-                )}
-
-                <p
-                  className="ago"
-                  style={{
-                    paddingLeft: selectedSource !== "all" ? "20px" : "0",
-                  }}
+              <span
+                  className="caret-news-top"
+                  onClick={handleSvgClick}
+                  style={{ cursor: "pointer" }}
                 >
-                  {(() => {
-                    const now = new Date();
-                    const date = new Date(item.date);
-                    const diffMs = now - date;
-                    const diffMinutes = Math.floor(diffMs / 60000);
+                  <svg
+                    width="13"
+                    height="13"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={isRotated ? "rotated" : ""}
+                  >
+                    <polygon points="6,0 0,12 12,12" fill="white" />
+                  </svg>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      textTransform: "lowercase",
+                      fontWeight: "lighter",
+                      paddingLeft: "5px",
+                    }}
+                  >
+                    Apasă pentru {isRotated ? "a ascunde" : "a vizualiza"} newsflow
+                  </span>
+                </span>
 
-                    if (diffMinutes === 0) {
-                      return `Chiar acum`;
-                    } else if (diffMinutes === 1) {
-                      return `Acum 1 minut`;
-                    } else if (diffMinutes < 60) {
-                      return diffMinutes > 19
-                        ? `Acum ${diffMinutes} de minute`
-                        : `Acum ${diffMinutes} minute`;
-                    } else {
-                      const hours = Math.floor(diffMinutes / 60);
-                      const minutes = diffMinutes % 60;
-                    
-                      const hourText =
-                        hours === 1
-                          ? "o oră"
-                          : hours === 2
-                          ? "două ore"
-                          : `${hours} ore`;
-                    
-                      const minuteText =
-                        minutes === 0
-                          ? ""
-                          : minutes > 19
-                          ? `${minutes} de minute`
-                          : `${minutes} minute`;
-                    
-                      return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
-                    }                    
-                  })()}
-                </p>
-              
+                
+                <span className="top-top" style={{ display:"flex", justifyContent:"space-between" }}>
+                  <span style={{ color:"#d80000" }}>newsflow</span>
+                  <span onClick={toggleAutoplay} style={{ cursor: "pointer" }}>
+                    autoplay{" "}
+                    {isAutoplay ? (
+                      <FaToggleOn
+                        style={{
+                          display: "inline-block",
+                          fontSize: "18px",
+                          verticalAlign: "bottom",
+                        }}
+                      />
+                    ) : (
+                      <FaToggleOff
+                        style={{
+                          display: "inline-block",
+                          fontSize: "18px",
+                          verticalAlign: "bottom",
+                          color:"grey"
+                        }}
+                      />
+                    )}
+                  </span>
+                </span>
 
-
-
+                
+              </div>
+              <div className={`news-item-container ${isRotated ? "show-items" : "hide-items"}`}>
+                {filteredData
+                  .filter((item) => !item.imgSrc)
+                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                  .map((item, index) => (
+                    <div className="news-item" key={index} style={{ borderLeft:".5px solid #d80000" }}>
+                      <span className="bumb bumbSpecial">&#8226;</span>
+                      {selectedSource === "all" && (
+                        <strong className="news-source">{item.source}</strong>
+                      )}
+                      <span className="bumb" style={{ verticalAlign:"middle" }}>&#8226;</span>
+                      <p
+                        className="ago"
+                        style={{
+                          paddingLeft: selectedSource !== "all" ? "20px" : "0",
+                        }}
+                      >
+                        {(() => {
+                          const now = new Date();
+                          const date = new Date(item.date);
+                          const diffMs = now - date;
+                          const diffMinutes = Math.floor(diffMs / 60000);
+                          if (diffMinutes === 0) {
+                            return `Chiar acum`;
+                          } else if (diffMinutes === 1) {
+                            return `Acum 1 minut`;
+                          } else if (diffMinutes < 60) {
+                            return diffMinutes > 19
+                              ? `Acum ${diffMinutes} de minute`
+                              : `Acum ${diffMinutes} minute`;
+                          } else {
+                            const hours = Math.floor(diffMinutes / 60);
+                            const minutes = diffMinutes % 60;
+                            const hourText =
+                              hours === 1
+                                ? "o oră"
+                                : hours === 2
+                                ? "două ore"
+                                : `${hours} ore`;
+                            const minuteText =
+                              minutes === 0
+                                ? ""
+                                : minutes > 19
+                                ? `${minutes} de minute`
+                                : `${minutes} minute`;
+                            return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
+                          }
+                        })()}
+                      </p>
+                      {item.href && (
+                        <a href={item.href} target="_blank" rel="noopener noreferrer">
+                          <h3>{item.text}</h3>
+                        </a>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+          {/* Afișăm articolele cu imagine care NU fac parte din Carousel */}
+          {sortedImageNews.length > 4 ? (
+            <>
+              {sortedImageNews.slice(4, visibleImageNewsCount).map((item, index) => (
+                <div className="container-news" key={index}>
+                  <img
+                    src={item.imgSrc}
+                    alt={item.text || "Image"}
+                    className="news-image"
+                  />
+                  {item.href && (
+                    <a href={item.href} target="_blank" rel="noopener noreferrer">
+                      <h3>{item.text}</h3>
+                      <p className="ago">
+                        {selectedSource === "all" && (
+                          <strong className="news-source">{item.source}</strong>
+                        )}
+                        <span className="bumb">&#8226;</span>
+                        {(() => {
+                          const now = new Date();
+                          const date = new Date(item.date);
+                          const diffMs = now - date;
+                          const diffMinutes = Math.floor(diffMs / 60000);
+                          if (diffMinutes === 0) {
+                            return `Chiar acum`;
+                          } else if (diffMinutes === 1) {
+                            return `Acum 1 minut`;
+                          } else if (diffMinutes < 60) {
+                            return diffMinutes > 19
+                              ? `Acum ${diffMinutes} de minute`
+                              : `Acum ${diffMinutes} minute`;
+                          } else {
+                            const hours = Math.floor(diffMinutes / 60);
+                            const minutes = diffMinutes % 60;
+                            const hourText =
+                              hours === 1
+                                ? "o oră"
+                                : hours === 2
+                                ? "două ore"
+                                : `${hours} ore`;
+                            const minuteText =
+                              minutes === 0
+                                ? ""
+                                : minutes > 19
+                                ? `${minutes} de minute`
+                                : `${minutes} minute`;
+                            return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
+                          }
+                        })()}
+                      </p>
+                    </a>
+                  )}
+                </div>
+              ))}
+              {/* Dacă mai există articole de afișat, se arată butonul de "Vezi mai multe stiri" */}
+              {sortedImageNews.length > visibleImageNewsCount && (
+                <button onClick={handleLoadMore} className="load-more-button">
+                  Vezi mai multe știri
+                </button>
+              )}
+            </>
+          ) : (
+            // Dacă sunt 4 sau mai puține articole cu imagine, le afișăm pe toate fără Carousel
+            sortedImageNews.map((item, index) => (
+              <div className="container-news" key={index}>
+                <img
+                  src={item.imgSrc}
+                  alt={item.text || "Image"}
+                  className="news-image"
+                />
                 {item.href && (
                   <a href={item.href} target="_blank" rel="noopener noreferrer">
                     <h3>{item.text}</h3>
-
-                  </a>
-                )}
-              </div>
-            ))}
-        </div>
-        </div>
-      )}
-      {filteredData
-        .filter((item) => item.imgSrc) // Elemente cu imgSrc valid
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(4)
-        .map((item, index) => (
-          <div className="container-news" key={index}>
-            <img
-              src={item.imgSrc}
-              alt={item.text || "Image"}
-              className="news-image"
-            />
-
-
-            {selectedSource === "all" && (
-              <strong className="news-source">{item.source}</strong>
-            )}
-
-            
-            
-            {item.href && (
-              <a href={item.href} target="_blank" rel="noopener noreferrer">
-                <h3>{item.text}</h3>
-                <p className="ago">
+                    <p className="ago">
+                      {selectedSource === "all" && (
+                        <strong className="news-source">{item.source}</strong>
+                      )}
+                      <span className="bumb">&#8226;</span>
                       {(() => {
                         const now = new Date();
                         const date = new Date(item.date);
                         const diffMs = now - date;
                         const diffMinutes = Math.floor(diffMs / 60000);
-
                         if (diffMinutes === 0) {
                           return `Chiar acum`;
                         } else if (diffMinutes === 1) {
@@ -291,39 +355,38 @@ return (
                         } else {
                           const hours = Math.floor(diffMinutes / 60);
                           const minutes = diffMinutes % 60;
-                        
                           const hourText =
                             hours === 1
                               ? "o oră"
                               : hours === 2
                               ? "două ore"
                               : `${hours} ore`;
-                        
                           const minuteText =
                             minutes === 0
                               ? ""
                               : minutes > 19
                               ? `${minutes} de minute`
                               : `${minutes} minute`;
-                        
                           return `Acum ${hourText}${minuteText ? ` și ${minuteText}` : ""}`;
                         }
-                        
                       })()}
+
                     </p>
-              </a>
-            )}
-          </div>
-        ))}
+
+                  </a>
+
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {showScrollTop && (
+        <div onClick={handleScrollTop} className="scroll-top" title="Scroll to top">
+          ▲
+        </div>
+      )}
     </div>
-  )}
-
-  {/* Săgeata scroll-top */}
-  {showScrollTop && (
-    <div onClick={handleScrollTop} className="scroll-top" title="Scroll to top">▲</div>
-  )}
-
-  </div>
   );
 };
 

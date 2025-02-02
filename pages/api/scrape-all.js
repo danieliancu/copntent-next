@@ -1,5 +1,3 @@
-const cron = require('node-cron'); // Import library for scheduling
-
 import puppeteer from "puppeteer";
 import mysql from "mysql2/promise";
 
@@ -115,13 +113,11 @@ const gotoWithRetry = async (page, url, retries = 3) => {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
       return;
     } catch (error) {
-      if (i === retries - 1) throw error; // Re-aruncă eroarea dacă este ultima încercare
+      if (i === retries - 1) throw error;
       console.warn(`Retrying ${url}, attempt ${i + 1}`);
     }
   }
 };
-
-
 
 const scrapeTags = async (page, tags, source) => {
   const results = [];
@@ -132,16 +128,13 @@ const scrapeTags = async (page, tags, source) => {
       tag,
       (elements, contentSelector, source) =>
         elements.map((el) => {
-          // Verifică categoria
           const categoryElement = el.querySelector(".article__category");
           const category = categoryElement ? categoryElement.textContent.trim() : null;
 
-          // Aplică filtrul pentru categoria "Sport" doar pentru sursa "fanatik"
           if (source === "fanatik" && category !== "Sport") {
             return null;
           }
 
-          // Extrage imaginea
           let imgSrc = null;
           const pictureElement = el.querySelector("picture");
           if (pictureElement) {
@@ -161,12 +154,10 @@ const scrapeTags = async (page, tags, source) => {
             imgSrc = imgElement?.getAttribute("src") || null;
           }
 
-          // Exclude imaginile inline sau cele de tip Base64
           if (imgSrc?.startsWith("data:image")) {
             imgSrc = null;
           }
 
-          // Preia titlul și link-ul articolului
           const contentElement = el.querySelector(contentSelector);
           const link = contentElement ? contentElement.querySelector("a") : null;
 
@@ -174,15 +165,15 @@ const scrapeTags = async (page, tags, source) => {
             imgSrc: imgSrc,
             text: contentElement ? contentElement.textContent.trim() : null,
             href: link ? link.href : null,
-            category: category, // Adaugă categoria la rezultatele finale
+            category: category,
           };
         }),
       contentSelector,
-      source // Trece sursa ca parametru
+      source
     );
 
     elements
-      .filter((element) => element !== null) // Elimină articolele excluse
+      .filter((element) => element !== null)
       .forEach((element) => {
         if (element.href && !seenLinks.has(element.href)) {
           seenLinks.add(element.href);
@@ -194,64 +185,82 @@ const scrapeTags = async (page, tags, source) => {
   return results;
 };
 
+const processScrapedData = async (scrapedData, connection, source, cat) => {
+  const insertQuery = `
+    INSERT INTO articles (source, text, href, imgSrc, cat) 
+    VALUES (?, ?, ?, ?, ?)
+  `;
 
+  for (const item of scrapedData) {
+    const [existing] = await connection.query(
+      "SELECT id FROM articles WHERE href = ?",
+      [item.href]
+    );
 
-// Function to run the scraping logic
-async function scrapingLogic() {
-  const browser = await puppeteer.launch({ headless: true });
-  const connection = await pool.getConnection();
+    if (existing.length === 0) {
+      await connection.query(insertQuery, [
+        item.source,
+        item.text,
+        item.href,
+        item.imgSrc || null,
+        cat,
+      ]);
+    }
+  }
+};
+
+export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+
+  const report = { totalScraped: 0, inserted: 0, skipped: 0, deleted: 0, details: [] };
 
   try {
-    // Șterge intrările mai vechi de 24 de ore și actualizează raportul
-    const [deleteResult] = await connection.query(
-      "DELETE FROM articles WHERE date < NOW() - INTERVAL 1 DAY"
-    );
-    console.log(`Deleted ${deleteResult.affectedRows} old articles.`);
+    const browser = await puppeteer.launch({ headless: true });
 
-    // Loop through each source in sitesConfig
-    for (const source in sitesConfig) {
-      const { url, tags, cat } = sitesConfig[source];
+    const connection = await pool.getConnection();
+    try {
+      const [deleteResult] = await connection.query(
+        "DELETE FROM articles WHERE date < NOW() - INTERVAL 1 DAY"
+      );
+      report.deleted = deleteResult.affectedRows;
 
-      try {
-        const page = await browser.newPage();
-        await gotoWithRetry(page, url);
+      for (const source in sitesConfig) {
+        const { url, tags, cat } = sitesConfig[source];
 
-        const scrapedData = await scrapeTags(page, tags, source);
+        try {
+          const page = await browser.newPage();
+          await gotoWithRetry(page, url);
 
-        for (const item of scrapedData) {
-          const [existing] = await connection.query(
-            "SELECT id FROM articles WHERE href = ?",
-            [item.href]
-          );
+          const scrapedData = await scrapeTags(page, tags, source);
+          report.totalScraped += scrapedData.length;
 
-          if (existing.length === 0) {
-            await connection.query(
-              "INSERT INTO articles (source, text, href, imgSrc, cat) VALUES (?, ?, ?, ?, ?)",
-              [item.source, item.text, item.href, item.imgSrc || null, cat]
-            );
-            console.log(`Inserted article: ${item.text}`);
-          } else {
-            console.log(`Skipped article (already exists): ${item.text}`);
-          }
+          await processScrapedData(scrapedData, connection, source, cat);
+
+          await page.close();
+        } catch (siteError) {
+          console.error(`Error scraping site ${source}:`, siteError.message);
         }
-
-        await page.close();
-      } catch (siteError) {
-        console.error(`Error scraping site ${source}:`, siteError.message);
       }
+    } finally {
+      connection.release();
     }
-  } finally {
-    connection.release();
-    browser.close();
+
+    await browser.close();
+
+    console.log("\nScraping Report:");
+    console.log(`- Total articles scraped: ${report.totalScraped}`);
+    console.log(`- Total articles inserted: ${report.inserted}`);
+    console.log(`- Total articles skipped: ${report.skipped}`);
+    console.log(`- Total articles deleted: ${report.deleted}`);
+
+    res.json({
+      message: "Scraping completed.",
+      report,
+    });
+  } catch (error) {
+    console.error("Error in scraping:", error.message);
+    res.status(500).json({ error: "Scraping failed" });
   }
 }
-
-// Schedule the scraping job to run every 5 minutes
-cron.schedule('*/5 * * * *', async () => {
-  console.log('Starting scraping job at', new Date());
-  await scrapingLogic();
-});
-
-// This line is not necessary in a server-side Node.js script
-// You can remove it if you plan to deploy this code to a server.
-// scrapingLogic(); // uncomment to run scraping logic manually
