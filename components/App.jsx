@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Carousel from "./Carousel";
 import Menu from "./Menu";
 import Top from "./Top";
+import Footer from "./Footer";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 
 const App = () => {
@@ -15,7 +16,35 @@ const App = () => {
   const [showScrollTop, setShowScrollTop] = useState(false); // Stare pentru săgeata de scroll-top
   // Starea pentru numărul de articole cu imagine afișate (după cele 4 din Carousel)
   const [visibleImageNewsCount, setVisibleImageNewsCount] = useState(20);
-  const [isAutoplay, setIsAutoplay] = useState(false);
+  const [isAutoplay, setIsAutoplay] = useState(true);
+
+
+  useEffect(() => {
+    let intervalId;
+  
+    if (isAutoplay) {
+      intervalId = setInterval(() => {
+        const container = document.querySelector('.news-item-container');
+        if (container) {
+          const currentTop = parseInt(container.style.top || '0', 10);
+          container.style.top = `${currentTop - 1}px`;
+  
+          // Reset
+          // if (Math.abs(currentTop) > resetThreshold) {
+          //   container.style.top = '0';
+          // }
+        }
+      }, 50); // O ajustare la fiecare 20ms creează o mișcare lină
+    }
+  
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isAutoplay]);
+  
+
+
+
 
   // Funcția de toggle: inversează starea curentă
   const toggleAutoplay = () => {
@@ -175,7 +204,7 @@ const App = () => {
                 </span>
 
                 
-                <span className="top-top" style={{ display:"flex", justifyContent:"space-between" }}>
+                <span className="top-top">
                   <span style={{ color:"#d80000" }}>newsflow</span>
                   <span onClick={toggleAutoplay} style={{ cursor: "pointer" }}>
                     autoplay{" "}
@@ -386,6 +415,8 @@ const App = () => {
           ▲
         </div>
       )}
+          <Footer />
+
     </div>
   );
 };

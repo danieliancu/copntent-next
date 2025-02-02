@@ -97,46 +97,6 @@ body {
   font-family: var(--title-font-family);
 }
 
-.title {
-  font-size: var(--title-font-size);
-  font-family: var(--title-font-family);
-  font-weight: var(--title-font-weight);
-  line-height: var(--title-line-height);
-  color: var(--title-color);
-}
-
-.title-small {
-  font-size: var(--title-small-font-size);
-  font-family: var(--title-small-font-family);
-  font-weight: var(--title-small-font-weight);
-  line-height: var(--title-small-line-height);
-  color: var(--title-small-color);
-}
-
-.title-big {
-  font-size: var(--title-big-font-size);
-  font-family: var(--title-big-font-family);
-  font-weight: var(--title-big-font-weight);
-  line-height: var(--title-big-line-height);
-  color: var(--title-big-color);
-}
-
-.text {
-  font-size: var(--text-font-size);
-  font-family: var(--text-font-family);
-  font-weight: var(--text-font-weight);
-  line-height: var(--text-line-height);
-  color: var(--text-color);
-}
-
-.menu {
-  font-size: var(--menu-font-size);
-  font-family: var(--menu-font-family);
-  font-weight: var(--menu-font-weight);
-  line-height: var(--menu-line-height);
-  color: var(--menu-color);
-  text-transform: var(--menu-text-transform);
-}
 
 
 
@@ -266,7 +226,7 @@ a:hover {
 .container-news-no-img {
   height: 430px;
   overflow: auto;
-  padding:20px;
+  padding:0 20px 20px 20px;
   border-radius:10px;
 }
 
@@ -307,7 +267,7 @@ padding-left:0;
 .container-news-no-img-top {
     background: white;
     position: sticky;
-    top: -20px;
+    top: 0px;
     padding: 5px 5px 10px 5px;
     text-transform: uppercase;
     font-weight: bold;
@@ -325,6 +285,7 @@ padding-left:0;
 .top-top {
   display: flex;
   justify-content: space-between;
+  padding: 10px 5px;
 }
 
 
@@ -603,7 +564,8 @@ button {
 
 .news-item-container.hide-items {
   max-height: unset; /* Ascunde conținutul */
-
+  top:0px;
+  position: relative;
 }
 
 .scroll-top {
@@ -944,7 +906,7 @@ button {
 
 
 .load-more-button {
-  margin: 10px 25% !important;
+  margin: 40px 25% !important;
   width:100%;
   display: block;
   background-color: black;
@@ -974,4 +936,105 @@ button {
     border:.1px solid black;
 
   }
+}
+
+
+
+
+
+/* Footer  */
+
+.footer {
+  padding: 40px 60px;
+  border-top:1px solid black;
+
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto !important;
+  text-align: center;
+}
+
+.footer-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.footer-columns {
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-column h3 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 5px;
+}
+
+.footer-column ul li a {
+  text-decoration: none;
+  color: black;
+  font-size: 14px;
+}
+
+.footer-column ul li a:hover {
+  text-decoration: underline;
+}
+
+.footer-column.newsletter p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.footer-column.newsletter input {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px !important;
+  margin-top:10px !important;
+}
+
+.footer-column.newsletter button {
+  width: 100%;
+  padding: 10px;
+  background-color: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.footer-column.newsletter button:hover {
+  background-color: #333;
+}
+
+.footer-columns .footer-column:not(:last-child) {
+  border-right: 1px solid black;
+  padding-right: 20px;
+}
+
+
+@media only screen and (max-width: 776px) {
+  .footer-columns .footer-column:not(:last-child) {
+    border-right: none;
+  }
+  
 }
